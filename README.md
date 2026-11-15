@@ -2,7 +2,9 @@
 
 A vertical, single-color **flow funnel** for marketing campaigns, with a **dropdown filter sidebar**, built as a **Sigma Computing custom plugin** with **D3 v7**. The widest stage sits at the bottom and volume narrows upward. Stage names and volumes are on the left, step conversion on the right, and crisp horizontal lines separate the stages.
 
-![preview](docs/preview.png)
+![Running inside Sigma on live Snowflake data](docs/sigma-workbook.png)
+
+*Running inside a published Sigma workbook on live Snowflake data.* **Live preview (fixed dataset):** https://jean-rodrigo-teixeira.github.io/sigma-d3-funnel/
 
 ## Highlights
 
@@ -73,3 +75,15 @@ A Sigma plugin is a hosted URL, so every dashboard picks up a deploy immediately
 - *"Volumes span almost three orders of magnitude, so total height is log-scaled while shares within a stage stay linear. The encoding is disclosed in the chart and switchable."*
 - *"The sidebar is driven by whatever dimensions the analyst maps in Sigma, so the same plugin serves any campaign table without code changes."*
 - *"Every filter change keeps the same path structure, so D3 interpolates the silhouette smoothly, and the separators are clipped to that same path, so they always follow the shape."*
+
+## Verified end to end
+
+Snowflake table (`PC_SIGMA_DB.PUBLIC.CAMPAIGN_FUNNEL`, 420 rows) → Sigma workbook → this plugin, registered as **Flow Funnel** with GitHub Pages as the production URL and `localhost:3000` (Sigma Plugin Dev Playground) for development.
+
+What the real environment caught that a local SDK mock did not:
+
+- The SDK's UMD bundle exposes a ready-made `SigmaPlugin.client`. There is no `initialize()` function.
+- `subscribeToElementData` / `subscribeToElementColumns` take the **element ID** from the config (`config.source`), not the config key.
+- Browsers cache plugin scripts aggressively, so script URLs carry a version (`?v=5`) to force a refresh after each release.
+- On the Snowflake side, the role Sigma uses (`PC_SIGMA_ROLE`) needs `USAGE` on the database and schema plus `SELECT` on the tables (`FUTURE TABLES` included, for dbt models).
+
